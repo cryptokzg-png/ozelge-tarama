@@ -1,0 +1,10 @@
+{
+  "appId": "com.ozelge.tarama",
+  "appName": "Özelge Tarama",
+  "webDir": "www",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

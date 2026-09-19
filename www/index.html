@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Özelge Tarama</title>
+<style>
+:root {
+  --bg: #f2f4f6;
+  --panel: #ffffff;
+  --ink: #16222c;
+  --muted: #5d6b77;
+  --line: #d9dee3;
+  --accent: #1b5b78;
+  --accent-ink: #ffffff;
+  --err: #a63a2a;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12181d;
+    --panel: #1a222a;
+    --ink: #e6ebef;
+    --muted: #9aa8b4;
+    --line: #2b3641;
+    --accent: #6fb4d1;
+    --accent-ink: #0c1a22;
+    --err: #ec8f7e;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+body {
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  -webkit-text-size-adjust: 100%;
+}
+header {
+  padding: 16px 16px 8px;
+  font-size: 20px; font-weight: 700; letter-spacing: -0.01em;
+}
+header small { display: block; font-weight: 400; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.filters {
+  margin: 8px 12px; padding: 12px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 12px;
+  display: grid; gap: 10px;
+}
+label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+input, select {
+  font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px; width: 100%; min-height: 44px;
+}
+input:focus-visible, select:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+}
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+button {
+  font: inherit; font-weight: 600; min-height: 44px; border-radius: 8px;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+  padding: 0 16px; cursor: pointer;
+}
+button.ghost { background: transparent; color: var(--accent); }
+.actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+#status { padding: 4px 16px; font-size: 13px; color: var(--muted); min-height: 24px; }
+#status.err { color: var(--err); }
+#list { padding: 4px 12px 24px; display: grid; gap: 8px; }
+.item {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px; text-align: left; color: var(--ink); font-weight: 400; display: block; width: 100%;
+  min-height: 0;
+}
+.item .t { font-weight: 600; margin-bottom: 6px; }
+.item .m { font-size: 13px; color: var(--muted); }
+#more { margin: 0 12px 28px; width: calc(100% - 24px); }
+#detail { display: none; }
+#detail .bar {
+  position: sticky; top: 0; background: var(--bg); padding: 10px 12px;
+  display: grid; grid-template-columns: auto 1fr; gap: 10px; border-bottom: 1px solid var(--line);
+  padding-top: calc(10px + env(safe-area-inset-top));
+}
+#detail .head { padding: 14px 16px 4px; }
+#detail h2 { margin: 0 0 6px; font-size: 18px; line-height: 1.3; }
+#detail .meta { font-size: 13px; color: var(--muted); }
+#body {
+  margin: 8px 12px 32px; padding: 14px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 12px;
+  font: 16px/1.6 Georgia, "Times New Roman", serif; overflow-x: auto;
+}
+#body table { max-width: 100%; border-collapse: collapse; }
+#body td, #body th { vertical-align: top; padding: 2px 4px; }
+#body p { margin: 0 0 0.8em; }
+</style>
+</head>
+<body>
+
+<div id="home">
+  <header>Özelge Tarama<small>GİB mevzuat veritabanı · <span id="total">…</span></small></header>
+
+  <div class="filters">
+    <label>Kanun
+      <select id="kanun"><option value="">Tüm kanunlar</option></select>
+    </label>
+    <label>Başlıkta ara
+      <input id="q" type="search" placeholder="örn. noter harcı" autocomplete="off" enterkeyhint="search">
+    </label>
+    <div class="row">
+      <label>Başlangıç tarihi <input id="d1" type="date"></label>
+      <label>Bitiş tarihi <input id="d2" type="date"></label>
+    </div>
+    <div class="actions">
+      <button id="go">Ara</button>
+      <button id="clear" class="ghost">Temizle</button>
+    </div>
+  </div>
+
+  <div id="status"></div>
+  <div id="list"></div>
+  <button id="more" class="ghost" hidden>Daha fazla yükle</button>
+</div>
+
+<div id="detail">
+  <div class="bar">
+    <button id="back" class="ghost">Geri</button>
+    <button id="copy" class="ghost">Metni kopyala</button>
+  </div>
+  <div class="head">
+    <h2 id="dt"></h2>
+    <div class="meta" id="dm"></div>
+  </div>
+  <div id="body"></div>
+</div>
+
+<script>
+const API = "https://gib.gov.tr/api/gibportal/mevzuat/";
+const HDR = {
+  "Content-Type": "application/json",
+  "Accept": "application/json, text/plain, */*",
+  "Referer": "https://www.gib.gov.tr/"
+};
+const PAGE_SIZE = 50;
+const $ = id => document.getElementById(id);
+
+let state = { page: 0, totalPages: 0, done: true, items: [], busy: false, filters: null };
+let scrollY = 0;
+
+async function post(path, params, body) {
+  const qs = new URLSearchParams(params).toString();
+  const r = await fetch(API + path + "?" + qs, {
+    method: "POST", headers: HDR, body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error("Sunucu hatası (HTTP " + r.status + ")");
+  const j = await r.json();
+  return j.resultContainer;
+}
+
+function setStatus(msg, isErr) {
+  const s = $("status");
+  s.textContent = msg || "";
+  s.className = isErr ? "err" : "";
+}
+
+function fmtDate(iso) {
+  return (iso || "").slice(0, 10).split("-").reverse().join(".");
+}
+
+async function loadKanunlar() {
+  try {
+    const rc = await post("kanun/filterList",
+      { page: 0, size: 1000, sortFieldName: "priority", sortType: "ASC" },
+      { kanunType: 99 });
+    const list = Array.isArray(rc) ? rc : (rc.content || []);
+    const sel = $("kanun");
+    list.forEach(k => {
+      const o = document.createElement("option");
+      o.value = k.id;
+      o.textContent = (k.kanunNo ? k.kanunNo + " – " : "") + k.title;
+      sel.appendChild(o);
+    });
+  } catch (e) {
+    setStatus("Kanun listesi alınamadı: " + e.message, true);
+  }
+}
+
+function currentFilters() {
+  return {
+    kanun: $("kanun").value,
+    q: $("q").value.trim(),
+    d1: $("d1").value,
+    d2: $("d2").value
+  };
+}
+
+function buildBody(f) {
+  const b = { status: 2, deleted: false, ktype: 99 };
+  if (f.kanun) b.kanunIds = [Number(f.kanun)];
+  if (f.q) b.title = f.q;
+  return b;
+}
+
+async function fetchMore(target) {
+  if (state.busy || state.done) return;
+  state.busy = true;
+  const f = state.filters;
+  let added = 0;
+  try {
+    while (!state.done && added < target) {
+      setStatus("Yükleniyor…");
+      const rc = await post("ozelge/list",
+        { page: state.page, size: PAGE_SIZE, sortFieldName: "ozelgeTarih", sortType: "DESC" },
+        buildBody(f));
+      state.totalPages = rc.totalPages;
+      state.total = rc.totalElements;
+      for (const it of rc.content) {
+        const d = (it.ozelgeTarih || "").slice(0, 10);
+        if (f.d2 && d > f.d2) continue;
+        if (f.d1 && d < f.d1) { state.done = true; break; }
+        state.items.push(it);
+        added++;
+      }
+      state.page++;
+      if (state.page >= state.totalPages) state.done = true;
+    }
+    render();
+    if (!state.items.length) {
+      setStatus("Sonuç bulunamadı. Filtreleri değiştirip tekrar dene.");
+    } else {
+      setStatus(state.items.length + " özelge listelendi" + (state.done ? "" : " — devamı var"));
+    }
+  } catch (e) {
+    setStatus("Bağlantı hatası: " + e.message + ". İnternetini kontrol edip tekrar dene.", true);
+  } finally {
+    state.busy = false;
+  }
+}
+
+function render() {
+  const list = $("list");
+  list.innerHTML = "";
+  state.items.forEach((it, i) => {
+    const b = document.createElement("button");
+    b.className = "item";
+    const t = document.createElement("div"); t.className = "t"; t.textContent = it.title || "(başlıksız)";
+    const m = document.createElement("div"); m.className = "m";
+    m.textContent = fmtDate(it.ozelgeTarih) + "  ·  " + (it.kanunTitle || "") + "  ·  " + (it.ozelgeNo || "");
+    b.append(t, m);
+    b.onclick = () => openDetail(i);
+    list.appendChild(b);
+  });
+  $("more").hidden = state.done || !state.items.length;
+}
+
+async function search() {
+  state = { page: 0, totalPages: 0, done: false, items: [], busy: false, filters: currentFilters(), total: 0 };
+  $("list").innerHTML = "";
+  $("more").hidden = true;
+  await fetchMore(20);
+}
+
+function sanitize(html) {
+  const doc = new DOMParser().parseFromString(html || "", "text/html");
+  doc.querySelectorAll("script,style,iframe,object,embed,link,meta").forEach(n => n.remove());
+  doc.querySelectorAll("*").forEach(n => {
+    [...n.attributes].forEach(a => {
+      if (/^on/i.test(a.name) || /^javascript:/i.test(a.value)) n.removeAttribute(a.name);
+    });
+  });
+  return doc.body.innerHTML;
+}
+
+function openDetail(i) {
+  const it = state.items[i];
+  scrollY = window.scrollY;
+  $("dt").textContent = it.title || "";
+  $("dm").textContent = fmtDate(it.ozelgeTarih) + " · " + (it.kanunTitle || "") + " · " + (it.ozelgeNo || "");
+  $("body").innerHTML = sanitize(it.description);
+  $("home").style.display = "none";
+  $("detail").style.display = "block";
+  window.scrollTo(0, 0);
+  history.pushState({ d: 1 }, "");
+}
+
+function closeDetail() {
+  $("detail").style.display = "none";
+  $("home").style.display = "block";
+  window.scrollTo(0, scrollY);
+}
+
+window.addEventListener("popstate", () => {
+  if ($("detail").style.display === "block") closeDetail();
+});
+
+$("back").onclick = () => history.back();
+$("copy").onclick = async () => {
+  const text = $("dt").textContent + "\n" + $("dm").textContent + "\n\n" + $("body").innerText;
+  try {
+    await navigator.clipboard.writeText(text);
+    $("copy").textContent = "Kopyalandı";
+  } catch (e) {
+    $("copy").textContent = "Kopyalanamadı";
+  }
+  setTimeout(() => { $("copy").textContent = "Metni kopyala"; }, 1800);
+};
+
+$("go").onclick = search;
+$("more").onclick = () => fetchMore(20);
+$("q").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("q").blur(); search(); } });
+$("clear").onclick = () => {
+  $("kanun").value = ""; $("q").value = ""; $("d1").value = ""; $("d2").value = "";
+  search();
+};
+
+(async function init() {
+  loadKanunlar();
+  await search();
+  if (state.total) $("total").textContent = state.total.toLocaleString("tr-TR") + " kayıt";
+})();
+</script>
+</body>
+</html>
