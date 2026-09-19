@@ -26,6 +26,7 @@ jobs:
       - name: Android projesini oluştur
         run: |
           npx cap add android
+          npx @capacitor/assets generate --android
           npx cap sync android
 
       - name: APK derle
