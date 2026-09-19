@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Özelge">
+<meta name="theme-color" content="#0f5fa8">
+<link rel="manifest" href="manifest.json">
 <title>Özelge Tarama</title>
 <style>
 :root {
@@ -532,8 +537,10 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
    SABITLER & DURUM
 ════════════════════════════ */
 const API = "https://gib.gov.tr/api/gibportal/mevzuat/";
+const PROXY = "https://ozelge-proxy.ozelgetarama.workers.dev";
 const HDR = {"Content-Type":"application/json","Accept":"application/json,text/plain,*/*","Referer":"https://www.gib.gov.tr/"};
 const $ = id => document.getElementById(id);
+const isNative = () => !!(window.Capacitor?.isNativePlatform?.());
 
 let allKanunlar = [];
 let selectedKanun = {id:"", label:"Tüm kanunlar"};  // form'daki seçili kanun
@@ -572,10 +579,24 @@ function addGecmis(filters){
    API
 ════════════════════════════ */
 async function post(path, params, body){
-  const r=await fetch(API+path+"?"+new URLSearchParams(params),
-    {method:"POST",headers:HDR,body:JSON.stringify(body)});
-  if(!r.ok) throw new Error("HTTP "+r.status);
-  return (await r.json()).resultContainer;
+  const qs = "?" + new URLSearchParams(params);
+  let data;
+  if(isNative()){
+    const {CapacitorHttp} = Capacitor.Plugins;
+    const resp = await CapacitorHttp.post({
+      url: API + path + qs,
+      headers: HDR,
+      data: body
+    });
+    if(resp.status >= 400) throw new Error("HTTP " + resp.status);
+    data = typeof resp.data === "string" ? JSON.parse(resp.data) : resp.data;
+  } else {
+    const r = await fetch(PROXY + "/" + path + qs,
+      {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    data = await r.json();
+  }
+  return data.resultContainer;
 }
 
 function fmtDate(iso){return (iso||"").slice(0,10).split("-").reverse().join(".");}
