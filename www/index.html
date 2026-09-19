@@ -99,7 +99,24 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
   box-shadow:0 2px 8px rgba(15,95,168,.3);}
 
 /* ── ANA SAYFA ── */
-#ana-search-box{margin:6px 14px 14px;padding:16px;display:grid;gap:12px;}
+#ana-hero{background:linear-gradient(155deg,#0a3d7a 0%,#0f5fa8 55%,#1a7ac7 100%);
+  padding:16px 16px 20px;margin-bottom:14px;display:grid;gap:12px;
+  border-radius:0 0 24px 24px;}
+.ana-hero-title{color:#fff;font-size:22px;font-weight:800;letter-spacing:-.02em;}
+.ana-hero-title small{display:block;font-weight:400;font-size:13px;color:rgba(255,255,255,.7);margin-top:3px;}
+#ana-hero .input-ico svg{stroke:rgba(255,255,255,.65);}
+#ana-hero #ana-q{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);
+  color:#fff;box-shadow:none;}
+#ana-hero #ana-q::placeholder{color:rgba(255,255,255,.5);}
+#ana-hero .quick-filters .chip{background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);
+  border:1px solid rgba(255,255,255,.18);box-shadow:none;}
+#ana-hero .quick-filters .chip.active{background:#fff;color:#0a3d7a;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);}
+#ana-hero #ana-ara-btn{background:#fff;color:#0a3d7a;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+#ana-hero #gelismis-btn{font:inherit;font-size:14px;min-height:38px;
+  background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);
+  border:1px solid rgba(255,255,255,.18);border-radius:var(--r-sm);
+  cursor:pointer;width:100%;padding:0 16px;}
 .quick-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
 .quick-filters::-webkit-scrollbar{display:none;}
 .recent-item{padding:12px 14px;display:flex;align-items:flex-start;gap:11px;
@@ -156,6 +173,8 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
 .r-item .badge{display:inline-block;font-size:11px;font-weight:700;
   padding:2px 8px;border-radius:20px;background:var(--accent-soft);
   color:var(--accent);letter-spacing:.02em;}
+.r-item .r-excerpt{font-size:12px;color:var(--muted);line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .r-item .m{font-size:12px;color:var(--muted);}
 .r-item .star-btn{background:none;border:none;font-size:22px;cursor:pointer;
   padding:2px 0 2px 6px;color:var(--line);min-height:0;flex-shrink:0;
@@ -255,7 +274,8 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
 
 /* ── DETAY ── */
 #detail{display:none;position:fixed;inset:0;background:var(--bg);
-  overflow-y:auto;z-index:300;padding-top:env(safe-area-inset-top);}
+  overflow-y:auto;z-index:300;padding-top:env(safe-area-inset-top);
+  padding-bottom:calc(64px + env(safe-area-inset-bottom));}
 #detail .dbar{position:sticky;top:0;z-index:10;
   background:var(--panel);box-shadow:var(--sh-sm);
   padding:11px 14px;display:flex;align-items:center;gap:8px;
@@ -268,25 +288,19 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
   opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s;
   margin:0 4px;}
 #detail .dbar.compact .d-title{opacity:1;transform:translateY(0);}
-#detail .dbar .d-star,
-#detail .dbar .d-find,
-#detail .dbar .d-copy,
-#detail .dbar .d-share{
-  font:inherit;font-weight:600;font-size:10px;
-  background:var(--accent-soft);color:var(--accent);
-  border:none;cursor:pointer;min-height:0;
-  padding:6px 10px;border-radius:12px;line-height:1;
-  display:flex;flex-direction:column;align-items:center;gap:3px;white-space:nowrap;}
-#detail .dbar .d-star,
-#detail .dbar .d-find,
-#detail .dbar .d-copy,
-#detail .dbar .d-share{font-size:10px;}
-#detail .dbar .d-btn-ico{font-size:18px;line-height:1;}
-#detail .dbar .d-star{background:var(--line);color:var(--muted);}
-#detail .dbar .d-star.on{background:#fff3cd;color:var(--star);}
-@media (prefers-color-scheme:dark){
-  #detail .dbar .d-star.on{background:rgba(240,197,74,.15);}
-}
+/* ── DETAY AKSİYON ÇUBUĞU ── */
+#d-actionbar{position:fixed;bottom:0;left:0;right:0;z-index:310;
+  background:var(--panel);border-top:1px solid var(--line);
+  box-shadow:0 -2px 12px rgba(0,0,0,.08);
+  display:none;grid-template-columns:repeat(4,1fr);
+  padding-bottom:env(safe-area-inset-bottom);}
+.dab-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:10px 4px;background:none;border:none;color:var(--muted);
+  font:inherit;font-size:10px;font-weight:600;cursor:pointer;min-height:0;
+  transition:color .15s;white-space:nowrap;}
+.dab-btn .dab-ico{font-size:22px;line-height:1;}
+.dab-btn:active{opacity:.7;}
+#d-star.on{color:var(--star);}
 /* Metin arama çubuğu */
 #d-findbar{display:none;position:sticky;top:46px;z-index:9;
   background:var(--panel);border-bottom:1px solid var(--line);
@@ -330,19 +344,16 @@ mark.hl.cur{background:#ff9800;color:#fff;}
      1. ANA SAYFA
 ═══════════════════════════════════════ -->
 <div id="screen-ana" class="screen active">
-  <div class="page-header">
-    Özelge Tarama
-    <small>GİB mevzuat veritabanı · <span id="total-count">…</span></small>
-  </div>
-
-  <!-- Arama kutusu -->
-  <div id="ana-search-box" class="card section">
+  <div id="ana-hero">
+    <div class="ana-hero-title">
+      Özelge Tarama
+      <small>GİB mevzuat veritabanı · <span id="total-count">…</span></small>
+    </div>
     <div class="input-ico">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input id="ana-q" type="search" placeholder="Özelge, konu veya anahtar kelime ara…"
              autocomplete="off" enterkeyhint="search">
     </div>
-    <!-- Hızlı zaman filtreleri -->
     <div class="quick-filters" id="quick-filters">
       <button class="chip active" data-days="">Tümü</button>
       <button class="chip" data-days="30">1 Ay</button>
@@ -351,9 +362,7 @@ mark.hl.cur{background:#ff9800;color:#fff;}
       <button class="chip" data-days="365">1 Yıl</button>
     </div>
     <button class="btn" id="ana-ara-btn">Ara</button>
-    <button class="btn btn-ghost" id="gelismis-btn" style="min-height:38px;font-size:14px;">
-      ⚙ Gelişmiş Filtreler
-    </button>
+    <button id="gelismis-btn">⚙ Gelişmiş Filtreler</button>
   </div>
 
   <!-- Hızlı Erişim -->
@@ -458,6 +467,7 @@ mark.hl.cur{background:#ff9800;color:#fff;}
       <input id="results-filter" type="search" placeholder="Sonuçlar içinde ara…" autocomplete="off">
     </div>
   </div>
+  <div id="law-chips" class="quick-filters section" style="display:none;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;margin-bottom:4px;"></div>
   <div id="status"></div>
   <div id="result-list"></div>
   <button class="btn btn-ghost" id="more-btn" hidden>Daha fazla yükle</button>
@@ -544,10 +554,6 @@ mark.hl.cur{background:#ff9800;color:#fff;}
   <div class="dbar" id="dbar">
     <button class="d-back" id="d-back">← Geri</button>
     <div class="d-title" id="d-bar-title"></div>
-    <button class="d-star" id="d-star" title="Favorilere ekle"><span class="d-btn-ico">☆</span>Favori</button>
-    <button class="d-find" id="d-find-btn" title="Metinde ara"><span class="d-btn-ico">🔍</span>Ara</button>
-    <button class="d-copy" id="d-copy"><span class="d-btn-ico">📋</span>Kopyala</button>
-    <button class="d-share" id="d-share"><span class="d-btn-ico">📤</span>Paylaş</button>
   </div>
   <div id="d-findbar">
     <input id="d-find-input" type="search" placeholder="Metinde ara…" autocomplete="off">
@@ -567,6 +573,14 @@ mark.hl.cur{background:#ff9800;color:#fff;}
   <div id="dbody"></div>
 </div>
 
+<!-- DETAY AKSİYON ÇUBUĞU -->
+<div id="d-actionbar">
+  <button class="dab-btn" id="d-star"><span class="dab-ico">☆</span>Favori</button>
+  <button class="dab-btn" id="d-find-btn"><span class="dab-ico">🔍</span>Ara</button>
+  <button class="dab-btn" id="d-copy"><span class="dab-ico">📋</span>Kopyala</button>
+  <button class="dab-btn" id="d-share"><span class="dab-ico">📤</span>Paylaş</button>
+</div>
+
 <script>
 /* ════════════════════════════
    SABITLER & DURUM
@@ -578,9 +592,26 @@ const $ = id => document.getElementById(id);
 const isNative = () => !!(window.Capacitor?.isNativePlatform?.());
 
 let allKanunlar = [];
-let selectedKanun = {id:"", label:"Tüm kanunlar"};  // form'daki seçili kanun
-let currentItem = null;  // açık detay
+let selectedKanun = {id:"", label:"Tüm kanunlar"};
+let currentItem = null;
 let searchState = {page:0,totalPages:0,done:true,items:[],busy:false,filters:null,sort:"DESC"};
+let activeKanunChip = "";
+
+function lawColor(kanunTitle){
+  const t=trLower(kanunTitle||"");
+  if(t.includes("katma değer")||t.includes("kdv")) return "#1565c0";
+  if(t.includes("gelir vergisi")||t.includes("g.v.k")) return "#2e7d32";
+  if(t.includes("kurumlar")) return "#e65100";
+  if(t.includes("harç")) return "#6a1b9a";
+  if(t.includes("özel tüketim")||t.includes("ötv")) return "#ad1457";
+  return null;
+}
+
+function stripHtml(html){
+  const tmp=document.createElement("div");
+  tmp.innerHTML=html||"";
+  return(tmp.textContent||"").replace(/\s+/g," ").trim();
+}
 
 /* ════════════════════════════
    STORAGE — Favoriler & Geçmiş
@@ -796,6 +827,7 @@ async function fetchPage(){
     }
     if(isFirst) $("result-list").innerHTML="";
     renderResults();
+    if(isFirst) renderLawChips();
     setStatus(searchState.items.length
       ? searchState.items.length+" özelge"+(searchState.done?"":" (devamı var)")
       : "Sonuç bulunamadı.");
@@ -838,6 +870,7 @@ function runSearch(fromAna){
     filters:{q,kanun,d1,d2,ozelgeNo},sort};
   $("result-list").innerHTML="";
   $("results-filter").value=""; resultsFilterQ="";
+  activeKanunChip=""; $("law-chips").style.display="none";
   $("more-btn").hidden=true;
 
   const info=[];
@@ -855,24 +888,46 @@ $("results-filter").addEventListener("input",e=>{
   renderResults(true);
 });
 
+function renderLawChips(){
+  const wrap=$("law-chips"); if(!wrap) return;
+  const kanunlar=[...new Set(searchState.items.map(i=>i.kanunTitle).filter(Boolean))].slice(0,10);
+  if(!kanunlar.length){wrap.style.display="none";return;}
+  wrap.style.display="flex";
+  wrap.innerHTML=`<button class="chip${!activeKanunChip?" active":""}" data-kn="">Tümü</button>`
+    +kanunlar.map(k=>`<button class="chip${activeKanunChip===k?" active":""}" data-kn="${esc(k)}">${esc(k)}</button>`).join("");
+  wrap.querySelectorAll(".chip").forEach(c=>{
+    c.addEventListener("click",()=>{
+      activeKanunChip=c.dataset.kn;
+      renderLawChips();
+      renderResults(true);
+    });
+  });
+}
+
 function renderResults(refilter=false){
   const list=$("result-list");
   if(refilter) list.innerHTML="";
-  const visible=resultsFilterQ
-    ? searchState.items.filter(it=>trLower(it.title||"").includes(resultsFilterQ)||trLower(it.ozelgeNo||"").includes(resultsFilterQ))
-    : searchState.items;
-  // Temiz render: mevcut çocuk sayısından fazlasını ekle
+  const visible=searchState.items.filter(it=>{
+    if(resultsFilterQ&&!trLower(it.title||"").includes(resultsFilterQ)&&!trLower(it.ozelgeNo||"").includes(resultsFilterQ)) return false;
+    if(activeKanunChip&&it.kanunTitle!==activeKanunChip) return false;
+    return true;
+  });
   const existingCount=list.children.length;
   visible.forEach((it,i)=>{
     if(!refilter&&i<existingCount) return;
     const el=document.createElement("button");
     el.className="r-item card";
     const starred=isFav(it.id);
-    el.innerHTML=`<div class="r-bar"></div>
+    const clr=lawColor(it.kanunTitle);
+    const barStyle=clr?` style="background:${clr}"`:"";
+    const badgeStyle=clr?` style="background:${clr}22;color:${clr}"`:"";
+    const excerpt=stripHtml(it.description).slice(0,130);
+    el.innerHTML=`<div class="r-bar"${barStyle}></div>
     <div class="ri-inner">
       <div class="ri-left">
         <div class="t">${esc(it.title||"(başlıksız)")}</div>
-        ${it.kanunTitle?`<span class="badge">${esc(it.kanunTitle)}</span>`:""}
+        ${it.kanunTitle?`<span class="badge"${badgeStyle}>${esc(it.kanunTitle)}</span>`:""}
+        ${excerpt?`<div class="r-excerpt">${esc(excerpt)}…</div>`:""}
         <div class="m">${fmtDate(it.ozelgeTarih)}${it.ozelgeNo?" · "+esc(it.ozelgeNo):""}</div>
       </div>
       <button class="star-btn${starred?" starred":""}" title="Favorilere ekle">${starred?"★":"☆"}</button>
@@ -889,6 +944,7 @@ function renderResults(refilter=false){
     list.appendChild(el);
   });
   $("more-btn").hidden=searchState.done||!searchState.items.length;
+  if(refilter) renderLawChips();
 }
 
 $("more-btn").onclick=fetchPage;
@@ -1079,13 +1135,14 @@ function openDetail(it){
   $("d-no").textContent=it.ozelgeNo||"";
   $("dbody").innerHTML=sanitize(it.description);
   const on=isFav(it.id);
-  $("d-star").innerHTML=(on?"<span class='d-btn-ico'>★</span>":"<span class='d-btn-ico'>☆</span>")+"Favori";
-  $("d-star").className=on?"d-star on":"d-star";
+  $("d-star").innerHTML=(on?"<span class='dab-ico'>★</span>":"<span class='dab-ico'>☆</span>")+"Favori";
+  $("d-star").className=on?"dab-btn on":"dab-btn";
   $("dbar").classList.remove("compact");
   $("d-findbar").classList.remove("open");
   $("d-find-input").value="";
   clearHighlights(); findMatches=[]; $("d-find-count").textContent="";
   $("detail").style.display="block";
+  $("d-actionbar").style.display="grid";
   $("detail").scrollTop=0;
   history.pushState({d:1},"");
 }
@@ -1098,6 +1155,7 @@ $("d-back").onclick=()=>history.back();
 window.addEventListener("popstate",()=>{
   if($("detail").style.display==="block"){
     $("detail").style.display="none";
+    $("d-actionbar").style.display="none";
     return;
   }
   if(navStack.length>1){
@@ -1110,17 +1168,17 @@ $("d-star").onclick=()=>{
   if(!currentItem) return;
   toggleFav(currentItem);
   const on=isFav(currentItem.id);
-  $("d-star").innerHTML=(on?"<span class='d-btn-ico'>★</span>":"<span class='d-btn-ico'>☆</span>")+"Favori";
-  $("d-star").className=on?"d-star on":"d-star";
+  $("d-star").innerHTML=(on?"<span class='dab-ico'>★</span>":"<span class='dab-ico'>☆</span>")+"Favori";
+  $("d-star").className=on?"dab-btn on":"dab-btn";
 };
 
 $("d-copy").onclick=async()=>{
   const text=($("d-title").textContent+"\n"+
     $("d-tarih").textContent+" · "+$("d-kanun").textContent+" · "+$("d-no").textContent+
     "\n\n"+$("dbody").innerText);
-  try{await navigator.clipboard.writeText(text);$("d-copy").innerHTML="<span class='d-btn-ico'>✓</span>Tamam";}
-  catch{$("d-copy").innerHTML="<span class='d-btn-ico'>❌</span>Hata";}
-  setTimeout(()=>{$("d-copy").innerHTML="<span class='d-btn-ico'>📋</span>Kopyala";},1800);
+  try{await navigator.clipboard.writeText(text);$("d-copy").innerHTML="<span class='dab-ico'>✓</span>Tamam";}
+  catch{$("d-copy").innerHTML="<span class='dab-ico'>❌</span>Hata";}
+  setTimeout(()=>{$("d-copy").innerHTML="<span class='dab-ico'>📋</span>Kopyala";},1800);
 };
 
 $("d-share").onclick=async()=>{
@@ -1130,9 +1188,9 @@ $("d-share").onclick=async()=>{
     try{await navigator.share({title,text,url:"https://www.gib.gov.tr/"});}catch{}
   } else {
     const t=title+"\n"+text+"\n\n"+$("dbody").innerText;
-    try{await navigator.clipboard.writeText(t);$("d-share").innerHTML="<span class='d-btn-ico'>✓</span>Tamam";}
+    try{await navigator.clipboard.writeText(t);$("d-share").innerHTML="<span class='dab-ico'>✓</span>Tamam";}
     catch{}
-    setTimeout(()=>{$("d-share").innerHTML="<span class='d-btn-ico'>📤</span>Paylaş";},1800);
+    setTimeout(()=>{$("d-share").innerHTML="<span class='dab-ico'>📤</span>Paylaş";},1800);
   }
 };
 
@@ -1196,8 +1254,16 @@ function updateFindNav(){
 }
 
 $("d-find-btn").onclick=()=>{
-  $("d-findbar").classList.add("open");
-  setTimeout(()=>$("d-find-input").focus(),80);
+  const isOpen=$("d-findbar").classList.contains("open");
+  if(isOpen){
+    $("d-findbar").classList.remove("open");
+    $("d-find-input").value="";
+    clearHighlights(); findMatches=[]; $("d-find-count").textContent="";
+    updateFindNav();
+  } else {
+    $("d-findbar").classList.add("open");
+    setTimeout(()=>$("d-find-input").focus(),80);
+  }
 };
 $("d-find-close").onclick=()=>{
   $("d-findbar").classList.remove("open");
