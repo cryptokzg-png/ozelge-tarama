@@ -322,9 +322,12 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
 .dab-btn:active{opacity:.7;}
 #d-star.on{color:var(--star);}
 /* Metin arama çubuğu */
-#d-findbar{display:none;position:sticky;top:46px;z-index:9;
+#d-findbar{display:none;position:fixed;
+  top:calc(46px + env(safe-area-inset-top));
+  left:0;right:0;z-index:320;
   background:var(--panel);border-bottom:1px solid var(--line);
-  padding:8px 10px;gap:6px;align-items:center;}
+  padding:8px 10px;gap:6px;align-items:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);}
 #d-findbar.open{display:flex;}
 #d-find-input{flex:1;min-height:36px;font-size:15px;padding:6px 10px;
   border:1.5px solid var(--accent);border-radius:8px;}
@@ -1169,6 +1172,7 @@ function openDetail(it){
   $("d-star").className=on?"dab-btn on":"dab-btn";
   $("dbar").classList.remove("compact");
   $("d-findbar").classList.remove("open");
+  $("detail").style.paddingTop="";
   $("d-find-input").value="";
   clearHighlights(); findMatches=[]; $("d-find-count").textContent="";
   $("detail").style.display="block";
@@ -1283,25 +1287,22 @@ function updateFindNav(){
   $("d-find-next").disabled=findMatches.length<2;
 }
 
-$("d-find-btn").onclick=()=>{
-  const isOpen=$("d-findbar").classList.contains("open");
-  if(isOpen){
-    $("d-findbar").classList.remove("open");
-    $("d-find-input").value="";
-    clearHighlights(); findMatches=[]; $("d-find-count").textContent="";
-    updateFindNav();
-  } else {
-    $("d-findbar").classList.add("open");
-    setTimeout(()=>$("d-find-input").focus(),80);
-  }
-};
-$("d-find-close").onclick=()=>{
+function closeFindbar(){
   $("d-findbar").classList.remove("open");
+  $("detail").style.paddingTop="";
   $("d-find-input").value="";
-  clearHighlights();
-  findMatches=[]; $("d-find-count").textContent="";
+  clearHighlights(); findMatches=[]; $("d-find-count").textContent="";
   updateFindNav();
+}
+function openFindbar(){
+  $("d-findbar").classList.add("open");
+  $("detail").style.paddingTop="calc(46px + env(safe-area-inset-top) + 54px)";
+  setTimeout(()=>$("d-find-input").focus(),80);
+}
+$("d-find-btn").onclick=()=>{
+  $("d-findbar").classList.contains("open") ? closeFindbar() : openFindbar();
 };
+$("d-find-close").onclick=closeFindbar;
 $("d-find-input").addEventListener("input",e=>doFind(e.target.value.trim()));
 $("d-find-input").addEventListener("keydown",e=>{
   if(e.key==="Enter"){e.preventDefault();
