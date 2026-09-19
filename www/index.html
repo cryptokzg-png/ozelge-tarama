@@ -272,11 +272,16 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
 #detail .dbar .d-find,
 #detail .dbar .d-copy,
 #detail .dbar .d-share{
-  font:inherit;font-weight:700;font-size:13px;
+  font:inherit;font-weight:600;font-size:10px;
   background:var(--accent-soft);color:var(--accent);
   border:none;cursor:pointer;min-height:0;
-  padding:7px 11px;border-radius:20px;line-height:1;
-  display:flex;align-items:center;gap:4px;white-space:nowrap;}
+  padding:6px 10px;border-radius:12px;line-height:1;
+  display:flex;flex-direction:column;align-items:center;gap:3px;white-space:nowrap;}
+#detail .dbar .d-star,
+#detail .dbar .d-find,
+#detail .dbar .d-copy,
+#detail .dbar .d-share{font-size:10px;}
+#detail .dbar .d-btn-ico{font-size:18px;line-height:1;}
 #detail .dbar .d-star{background:var(--line);color:var(--muted);}
 #detail .dbar .d-star.on{background:#fff3cd;color:var(--star);}
 @media (prefers-color-scheme:dark){
@@ -539,10 +544,10 @@ mark.hl.cur{background:#ff9800;color:#fff;}
   <div class="dbar" id="dbar">
     <button class="d-back" id="d-back">← Geri</button>
     <div class="d-title" id="d-bar-title"></div>
-    <button class="d-star" id="d-star" title="Favorilere ekle">☆ Favori</button>
-    <button class="d-find" id="d-find-btn" title="Metinde ara">🔍 Ara</button>
-    <button class="d-copy" id="d-copy">📋 Kopyala</button>
-    <button class="d-share" id="d-share">📤 Paylaş</button>
+    <button class="d-star" id="d-star" title="Favorilere ekle"><span class="d-btn-ico">☆</span>Favori</button>
+    <button class="d-find" id="d-find-btn" title="Metinde ara"><span class="d-btn-ico">🔍</span>Ara</button>
+    <button class="d-copy" id="d-copy"><span class="d-btn-ico">📋</span>Kopyala</button>
+    <button class="d-share" id="d-share"><span class="d-btn-ico">📤</span>Paylaş</button>
   </div>
   <div id="d-findbar">
     <input id="d-find-input" type="search" placeholder="Metinde ara…" autocomplete="off">
@@ -1074,7 +1079,7 @@ function openDetail(it){
   $("d-no").textContent=it.ozelgeNo||"";
   $("dbody").innerHTML=sanitize(it.description);
   const on=isFav(it.id);
-  $("d-star").textContent=(on?"★":"☆")+" Favori";
+  $("d-star").innerHTML=(on?"<span class='d-btn-ico'>★</span>":"<span class='d-btn-ico'>☆</span>")+"Favori";
   $("d-star").className=on?"d-star on":"d-star";
   $("dbar").classList.remove("compact");
   $("d-findbar").classList.remove("open");
@@ -1105,7 +1110,7 @@ $("d-star").onclick=()=>{
   if(!currentItem) return;
   toggleFav(currentItem);
   const on=isFav(currentItem.id);
-  $("d-star").textContent=(on?"★":"☆")+" Favori";
+  $("d-star").innerHTML=(on?"<span class='d-btn-ico'>★</span>":"<span class='d-btn-ico'>☆</span>")+"Favori";
   $("d-star").className=on?"d-star on":"d-star";
 };
 
@@ -1113,9 +1118,9 @@ $("d-copy").onclick=async()=>{
   const text=($("d-title").textContent+"\n"+
     $("d-tarih").textContent+" · "+$("d-kanun").textContent+" · "+$("d-no").textContent+
     "\n\n"+$("dbody").innerText);
-  try{await navigator.clipboard.writeText(text);$("d-copy").textContent="✓ Kopyalandı";}
-  catch{$("d-copy").textContent="Hata";}
-  setTimeout(()=>{$("d-copy").textContent="📋 Kopyala";},1800);
+  try{await navigator.clipboard.writeText(text);$("d-copy").innerHTML="<span class='d-btn-ico'>✓</span>Tamam";}
+  catch{$("d-copy").innerHTML="<span class='d-btn-ico'>❌</span>Hata";}
+  setTimeout(()=>{$("d-copy").innerHTML="<span class='d-btn-ico'>📋</span>Kopyala";},1800);
 };
 
 $("d-share").onclick=async()=>{
@@ -1125,9 +1130,9 @@ $("d-share").onclick=async()=>{
     try{await navigator.share({title,text,url:"https://www.gib.gov.tr/"});}catch{}
   } else {
     const t=title+"\n"+text+"\n\n"+$("dbody").innerText;
-    try{await navigator.clipboard.writeText(t);$("d-share").textContent="✓ Kopyalandı";}
+    try{await navigator.clipboard.writeText(t);$("d-share").innerHTML="<span class='d-btn-ico'>✓</span>Tamam";}
     catch{}
-    setTimeout(()=>{$("d-share").textContent="📤 Paylaş";},1800);
+    setTimeout(()=>{$("d-share").innerHTML="<span class='d-btn-ico'>📤</span>Paylaş";},1800);
   }
 };
 
