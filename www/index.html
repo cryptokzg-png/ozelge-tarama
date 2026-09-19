@@ -129,10 +129,19 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
 #ana-hero .quick-filters .chip.active{background:#fff;color:#0a3d7a;
   box-shadow:0 2px 8px rgba(0,0,0,.2);}
 #ana-hero #ana-ara-btn{background:#fff;color:#0a3d7a;box-shadow:0 2px 12px rgba(0,0,0,.25);}
-#ana-hero #gelismis-btn{font:inherit;font-size:14px;min-height:38px;
+#ana-hero #coklu-ara-btn{font:inherit;font-size:14px;min-height:38px;
   background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);
   border:1px solid rgba(255,255,255,.18);border-radius:var(--r-sm);
   cursor:pointer;width:100%;padding:0 16px;}
+#ana-hero #gelismis-btn{font:inherit;font-size:14px;min-height:38px;
+  background:rgba(255,255,255,.08);color:rgba(255,255,255,.65);
+  border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);
+  cursor:pointer;width:100%;padding:0 16px;}
+.coklu-kw-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;
+  background:var(--accent-soft);color:var(--accent);border-radius:20px;
+  font-size:13px;font-weight:600;}
+.coklu-kw-chip button{background:none;border:none;padding:0;cursor:pointer;
+  color:var(--accent);font-size:14px;line-height:1;opacity:.7;}
 .quick-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
 .quick-filters::-webkit-scrollbar{display:none;}
 .recent-item{padding:12px 14px;display:flex;align-items:flex-start;gap:11px;
@@ -389,30 +398,19 @@ mark.hl.cur{background:#ff9800;color:#fff;}
       <button class="chip" data-days="365">1 Yıl</button>
     </div>
     <button class="btn" id="ana-ara-btn">Ara</button>
+    <button id="coklu-ara-btn">⊕ Çoklu Arama</button>
     <button id="gelismis-btn">⚙ Gelişmiş Filtreler</button>
   </div>
 
-  <!-- Hızlı Erişim -->
-  <div class="section">
-    <div class="section-title">Hızlı Erişim</div>
-    <div class="row2" style="gap:8px;">
-      <button class="card chip" style="border-radius:var(--r);padding:14px;display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600;" onclick="showTab('screen-kanunlar')">
-        <svg style="width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        Kanunlar
-      </button>
-      <button class="card chip" style="border-radius:var(--r);padding:14px;display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600;" onclick="showTab('screen-favoriler')">
-        <svg style="width:20px;height:20px;stroke:var(--star);fill:none;stroke-width:2;stroke-linecap:round;" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        Favoriler
-      </button>
-      <button class="card chip" style="border-radius:var(--r);padding:14px;display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600;" onclick="showTab('screen-gecmis')">
-        <svg style="width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Arama Geçmişi
-      </button>
-      <button class="card chip" id="kayitli-btn" style="border-radius:var(--r);padding:14px;display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600;" onclick="showTab('screen-gecmis')">
-        <svg style="width:20px;height:20px;stroke:var(--green);fill:none;stroke-width:2;stroke-linecap:round;" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-        Kayıtlı Aramalar
-      </button>
+  <!-- Çoklu Arama Paneli -->
+  <div id="coklu-panel" style="display:none;background:var(--panel);border-bottom:1px solid var(--line);padding:14px 16px 16px;">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.4;">Tüm kelimelerin aynı anda geçtiği özelgeleri arar. <strong style="color:var(--ink);">AND mantığı.</strong></div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="coklu-input" type="text" placeholder="Kelime ekle…" style="flex:1;padding:10px 12px;border-radius:var(--r-sm);border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px;outline:none;">
+      <button id="coklu-ekle-btn" style="padding:10px 16px;border-radius:var(--r-sm);background:var(--accent);color:var(--accent-ink);border:none;font:inherit;font-size:14px;font-weight:700;cursor:pointer;">+</button>
     </div>
+    <div id="coklu-chips" style="display:flex;flex-wrap:wrap;gap:6px;min-height:0;margin-bottom:12px;"></div>
+    <button class="btn" id="coklu-ara-go" style="opacity:.4;pointer-events:none;">Çoklu Ara</button>
   </div>
 
   <!-- Son Eklenen -->
@@ -944,6 +942,10 @@ function renderResults(refilter=false){
   const visible=searchState.items.filter(it=>{
     if(resultsFilterQ&&!trLower(it.title||"").includes(resultsFilterQ)&&!trLower(it.ozelgeNo||"").includes(resultsFilterQ)) return false;
     if(activeKanunChip&&it.kanunTitle!==activeKanunChip) return false;
+    if(searchState.filters.multiQ&&searchState.filters.multiQ.length>1){
+      const text=trLower((it.title||"")+" "+stripHtml(it.description||""));
+      if(!searchState.filters.multiQ.every(kw=>text.includes(trLower(kw)))) return false;
+    }
     return true;
   });
   const existingCount=list.children.length;
@@ -986,6 +988,55 @@ $("more-btn").onclick=fetchPage;
 /* ── Ana sayfa ara ── */
 $("ana-ara-btn").onclick=()=>runSearch(true);
 $("ana-q").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runSearch(true);}});
+
+/* ── Çoklu Arama ── */
+let cokluKeywords=[];
+function renderCokluChips(){
+  const wrap=$("coklu-chips");
+  wrap.innerHTML=cokluKeywords.map((kw,i)=>
+    `<span class="coklu-kw-chip">${esc(kw)}<button data-i="${i}" title="Kaldır">×</button></span>`
+  ).join("");
+  wrap.querySelectorAll("button[data-i]").forEach(b=>{
+    b.onclick=()=>{cokluKeywords.splice(Number(b.dataset.i),1);renderCokluChips();};
+  });
+  const canSearch=cokluKeywords.length>=2;
+  $("coklu-ara-go").style.opacity=canSearch?"1":".4";
+  $("coklu-ara-go").style.pointerEvents=canSearch?"auto":"none";
+}
+function addCokluKeyword(){
+  const v=$("coklu-input").value.trim();
+  if(!v||cokluKeywords.includes(v)) return;
+  cokluKeywords.push(v);
+  $("coklu-input").value="";
+  renderCokluChips();
+  $("coklu-input").focus();
+}
+$("coklu-ara-btn").onclick=()=>{
+  const p=$("coklu-panel");
+  const open=p.style.display!=="none";
+  p.style.display=open?"none":"block";
+  if(!open) $("coklu-input").focus();
+};
+$("coklu-ekle-btn").onclick=addCokluKeyword;
+$("coklu-input").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addCokluKeyword();}});
+$("coklu-ara-go").onclick=runCokluArama;
+function runCokluArama(){
+  if(cokluKeywords.length<2) return;
+  const [q,...rest]=cokluKeywords;
+  $("coklu-panel").style.display="none";
+  addGecmis({q,kanun:"",kanunLabel:"Tüm kanunlar",d1:"",d2:"",ozelgeNo:""});
+  searchState={page:0,totalPages:0,done:false,items:[],busy:false,
+    filters:{q,kanun:"",d1:"",d2:"",ozelgeNo:"",multiQ:cokluKeywords.slice()},sort:"DESC"};
+  $("result-list").innerHTML="";
+  $("results-filter").value=""; resultsFilterQ="";
+  activeKanunChip=""; $("law-chips").style.display="none";
+  $("more-btn").hidden=true;
+  $("results-back-btn").dataset.back="screen-ana";
+  const label=cokluKeywords.join(" + ");
+  $("results-q-label").textContent=label||"";
+  showTab("screen-results");
+  fetchPage();
+}
 
 /* ── Hızlı filtreler ── */
 $("quick-filters").querySelectorAll(".chip").forEach(c=>{
