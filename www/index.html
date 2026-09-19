@@ -21,7 +21,7 @@
   --sh-sm: 0 1px 2px rgba(0,0,0,.06),0 2px 6px rgba(0,0,0,.04);
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0f161d; --panel: #18222c; --ink: #dde6ef; --muted: #8fa2b4;
     --line: rgba(255,255,255,.07); --accent: #4fa8e0; --accent2: #6bbde8;
     --accent-ink: #08131b; --accent-soft: rgba(79,168,224,.14);
@@ -29,6 +29,22 @@
     --sh: 0 1px 3px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
     --sh-sm: 0 1px 2px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.15);
   }
+}
+:root[data-theme="dark"]{
+  --bg:#0f161d;--panel:#18222c;--ink:#dde6ef;--muted:#8fa2b4;
+  --line:rgba(255,255,255,.07);--accent:#4fa8e0;--accent2:#6bbde8;
+  --accent-ink:#08131b;--accent-soft:rgba(79,168,224,.14);
+  --err:#f08080;--star:#f5c84a;--green:#4caf82;
+  --sh:0 1px 3px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+  --sh-sm:0 1px 2px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.15);
+}
+:root[data-theme="light"]{
+  --bg:#edf0f4;--panel:#ffffff;--ink:#0e1c27;--muted:#52677a;
+  --line:rgba(0,0,0,.07);--accent:#0f5fa8;--accent2:#1a7ac7;
+  --accent-ink:#fff;--accent-soft:rgba(15,95,168,.1);
+  --err:#b93030;--star:#e09400;--green:#127a42;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.06);
+  --sh-sm:0 1px 2px rgba(0,0,0,.06),0 2px 6px rgba(0,0,0,.04);
 }
 *{box-sizing:border-box;}
 html,body{margin:0;background:var(--bg);color:var(--ink);}
@@ -292,8 +308,12 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
 #d-actionbar{position:fixed;bottom:0;left:0;right:0;z-index:310;
   background:var(--panel);border-top:1px solid var(--line);
   box-shadow:0 -2px 12px rgba(0,0,0,.08);
-  display:none;grid-template-columns:repeat(2,1fr);
+  display:none;grid-template-columns:repeat(4,1fr);
   padding-bottom:env(safe-area-inset-bottom);}
+/* tema toggle */
+#theme-toggle{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+  border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;align-self:center;}
 .dab-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:3px;padding:10px 4px;background:none;border:none;color:var(--muted);
   font:inherit;font-size:11px;font-weight:600;cursor:pointer;min-height:0;
@@ -301,13 +321,6 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
 .dab-btn .dab-ico{font-size:24px;line-height:1;}
 .dab-btn:active{opacity:.7;}
 #d-star.on{color:var(--star);}
-/* dbar top butonlar (Ara + Paylaş) */
-.dab-top{font:inherit;font-weight:600;font-size:10px;
-  background:var(--accent-soft);color:var(--accent);
-  border:none;cursor:pointer;min-height:0;
-  padding:6px 10px;border-radius:12px;line-height:1;
-  display:flex;flex-direction:column;align-items:center;gap:3px;white-space:nowrap;}
-.dab-top-ico{font-size:18px;line-height:1;}
 /* Metin arama çubuğu */
 #d-findbar{display:none;position:sticky;top:46px;z-index:9;
   background:var(--panel);border-bottom:1px solid var(--line);
@@ -352,9 +365,12 @@ mark.hl.cur{background:#ff9800;color:#fff;}
 ═══════════════════════════════════════ -->
 <div id="screen-ana" class="screen active">
   <div id="ana-hero">
-    <div class="ana-hero-title">
-      Özelge Tarama
-      <small>GİB mevzuat veritabanı · <span id="total-count">…</span></small>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+      <div class="ana-hero-title">
+        Özelge Tarama
+        <small>GİB mevzuat veritabanı · <span id="total-count">…</span></small>
+      </div>
+      <button id="theme-toggle" title="Tema değiştir">🌙</button>
     </div>
     <div class="input-ico">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -561,8 +577,6 @@ mark.hl.cur{background:#ff9800;color:#fff;}
   <div class="dbar" id="dbar">
     <button class="d-back" id="d-back">← Geri</button>
     <div class="d-title" id="d-bar-title"></div>
-    <button class="dab-top" id="d-find-btn" title="Metinde ara"><span class="dab-top-ico">🔍</span>Ara</button>
-    <button class="dab-top" id="d-share"><span class="dab-top-ico">📤</span>Paylaş</button>
   </div>
   <div id="d-findbar">
     <input id="d-find-input" type="search" placeholder="Metinde ara…" autocomplete="off">
@@ -585,10 +599,19 @@ mark.hl.cur{background:#ff9800;color:#fff;}
 <!-- DETAY AKSİYON ÇUBUĞU -->
 <div id="d-actionbar">
   <button class="dab-btn" id="d-star"><span class="dab-ico">☆</span>Favori</button>
+  <button class="dab-btn" id="d-find-btn"><span class="dab-ico">🔍</span>Ara</button>
   <button class="dab-btn" id="d-copy"><span class="dab-ico">📋</span>Kopyala</button>
+  <button class="dab-btn" id="d-share"><span class="dab-ico">📤</span>Paylaş</button>
 </div>
 
 <script>
+/* ════════════════════════════
+   TEMA
+════════════════════════════ */
+(function(){
+  try{const t=localStorage.getItem("ozt_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch{}
+})();
+
 /* ════════════════════════════
    SABITLER & DURUM
 ════════════════════════════ */
@@ -1195,9 +1218,9 @@ $("d-share").onclick=async()=>{
     try{await navigator.share({title,text,url:"https://www.gib.gov.tr/"});}catch{}
   } else {
     const t=title+"\n"+text+"\n\n"+$("dbody").innerText;
-    try{await navigator.clipboard.writeText(t);$("d-share").innerHTML="<span class='dab-top-ico'>✓</span>Tamam";}
+    try{await navigator.clipboard.writeText(t);$("d-share").innerHTML="<span class='dab-ico'>✓</span>Tamam";}
     catch{}
-    setTimeout(()=>{$("d-share").innerHTML="<span class='dab-top-ico'>📤</span>Paylaş";},1800);
+    setTimeout(()=>{$("d-share").innerHTML="<span class='dab-ico'>📤</span>Paylaş";},1800);
   }
 };
 
@@ -1319,12 +1342,29 @@ async function loadSonEklenen(){
 }
 
 /* ════════════════════════════
+   TEMA TOGGLE
+════════════════════════════ */
+function updateThemeBtn(){
+  const t=document.documentElement.getAttribute("data-theme");
+  const isDark=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme:dark)").matches);
+  $("theme-toggle").textContent=isDark?"☀️":"🌙";
+}
+$("theme-toggle").onclick=()=>{
+  const t=document.documentElement.getAttribute("data-theme");
+  const isDark=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme:dark)").matches);
+  const next=isDark?"light":"dark";
+  document.documentElement.setAttribute("data-theme",next);
+  try{localStorage.setItem("ozt_theme",next);}catch{}
+  updateThemeBtn();
+};
+updateThemeBtn();
+
+/* ════════════════════════════
    İLK YÜKLEMEr
 ════════════════════════════ */
 (async function init(){
   loadKanunlar();
   loadSonEklenen();
-  // toplam kayıt sayısı
   try{
     const rc=await post("ozelge/list",{page:0,size:1,sortFieldName:"ozelgeTarih",sortType:"DESC"},{status:2,deleted:false,ktype:99});
     if(rc.totalElements) $("total-count").textContent=rc.totalElements.toLocaleString("tr-TR")+" kayıt";
