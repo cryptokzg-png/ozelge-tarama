@@ -275,7 +275,7 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
 /* ── DETAY ── */
 #detail{display:none;position:fixed;inset:0;background:var(--bg);
   overflow-y:auto;z-index:300;padding-top:env(safe-area-inset-top);
-  padding-bottom:calc(64px + env(safe-area-inset-bottom));}
+  padding-bottom:calc(58px + env(safe-area-inset-bottom));}
 #detail .dbar{position:sticky;top:0;z-index:10;
   background:var(--panel);box-shadow:var(--sh-sm);
   padding:11px 14px;display:flex;align-items:center;gap:8px;
@@ -292,15 +292,22 @@ label.lbl{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)
 #d-actionbar{position:fixed;bottom:0;left:0;right:0;z-index:310;
   background:var(--panel);border-top:1px solid var(--line);
   box-shadow:0 -2px 12px rgba(0,0,0,.08);
-  display:none;grid-template-columns:repeat(4,1fr);
+  display:none;grid-template-columns:repeat(2,1fr);
   padding-bottom:env(safe-area-inset-bottom);}
 .dab-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:3px;padding:10px 4px;background:none;border:none;color:var(--muted);
-  font:inherit;font-size:10px;font-weight:600;cursor:pointer;min-height:0;
+  font:inherit;font-size:11px;font-weight:600;cursor:pointer;min-height:0;
   transition:color .15s;white-space:nowrap;}
-.dab-btn .dab-ico{font-size:22px;line-height:1;}
+.dab-btn .dab-ico{font-size:24px;line-height:1;}
 .dab-btn:active{opacity:.7;}
 #d-star.on{color:var(--star);}
+/* dbar top butonlar (Ara + Paylaş) */
+.dab-top{font:inherit;font-weight:600;font-size:10px;
+  background:var(--accent-soft);color:var(--accent);
+  border:none;cursor:pointer;min-height:0;
+  padding:6px 10px;border-radius:12px;line-height:1;
+  display:flex;flex-direction:column;align-items:center;gap:3px;white-space:nowrap;}
+.dab-top-ico{font-size:18px;line-height:1;}
 /* Metin arama çubuğu */
 #d-findbar{display:none;position:sticky;top:46px;z-index:9;
   background:var(--panel);border-bottom:1px solid var(--line);
@@ -554,6 +561,8 @@ mark.hl.cur{background:#ff9800;color:#fff;}
   <div class="dbar" id="dbar">
     <button class="d-back" id="d-back">← Geri</button>
     <div class="d-title" id="d-bar-title"></div>
+    <button class="dab-top" id="d-find-btn" title="Metinde ara"><span class="dab-top-ico">🔍</span>Ara</button>
+    <button class="dab-top" id="d-share"><span class="dab-top-ico">📤</span>Paylaş</button>
   </div>
   <div id="d-findbar">
     <input id="d-find-input" type="search" placeholder="Metinde ara…" autocomplete="off">
@@ -576,9 +585,7 @@ mark.hl.cur{background:#ff9800;color:#fff;}
 <!-- DETAY AKSİYON ÇUBUĞU -->
 <div id="d-actionbar">
   <button class="dab-btn" id="d-star"><span class="dab-ico">☆</span>Favori</button>
-  <button class="dab-btn" id="d-find-btn"><span class="dab-ico">🔍</span>Ara</button>
   <button class="dab-btn" id="d-copy"><span class="dab-ico">📋</span>Kopyala</button>
-  <button class="dab-btn" id="d-share"><span class="dab-ico">📤</span>Paylaş</button>
 </div>
 
 <script>
@@ -1188,9 +1195,9 @@ $("d-share").onclick=async()=>{
     try{await navigator.share({title,text,url:"https://www.gib.gov.tr/"});}catch{}
   } else {
     const t=title+"\n"+text+"\n\n"+$("dbody").innerText;
-    try{await navigator.clipboard.writeText(t);$("d-share").innerHTML="<span class='dab-ico'>✓</span>Tamam";}
+    try{await navigator.clipboard.writeText(t);$("d-share").innerHTML="<span class='dab-top-ico'>✓</span>Tamam";}
     catch{}
-    setTimeout(()=>{$("d-share").innerHTML="<span class='dab-ico'>📤</span>Paylaş";},1800);
+    setTimeout(()=>{$("d-share").innerHTML="<span class='dab-top-ico'>📤</span>Paylaş";},1800);
   }
 };
 
