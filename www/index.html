@@ -1033,8 +1033,8 @@ function runCokluArama(){
   $("more-btn").hidden=true;
   $("results-back-btn").dataset.back="screen-ana";
   const label=cokluKeywords.join(" + ");
-  $("results-q-label").textContent=label||"";
-  showTab("screen-results");
+  $("results-info").textContent='"'+label+'"';
+  showTab("screen-sonuclar");
   fetchPage();
 }
 
