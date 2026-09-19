@@ -72,6 +72,58 @@ button.ghost { background: transparent; color: var(--accent); }
 .item .t { font-weight: 600; margin-bottom: 6px; }
 .item .m { font-size: 13px; color: var(--muted); }
 #more { margin: 0 12px 28px; width: calc(100% - 24px); }
+
+/* Kanun seçici butonu */
+.kanun-btn {
+  font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 36px 10px 10px;
+  width: 100%; min-height: 44px; text-align: left; position: relative; cursor: pointer;
+  font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kanun-btn::after {
+  content: "▾"; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); pointer-events: none;
+}
+
+/* Kanun modal */
+#kanun-modal {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.45); align-items: flex-end;
+}
+#kanun-modal.open { display: flex; }
+#kanun-sheet {
+  background: var(--panel); border-radius: 16px 16px 0 0;
+  width: 100%; max-height: 80vh; display: flex; flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+#kanun-sheet .sh-head {
+  padding: 16px 16px 8px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+#kanun-sheet .sh-head span { font-weight: 700; font-size: 17px; }
+#kanun-sheet .sh-head button { background: none; border: none; font-size: 22px; color: var(--muted); min-height: 0; padding: 0 4px; }
+#kanun-search-wrap { padding: 10px 12px; }
+#kanun-search {
+  font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 10px 10px 36px;
+  width: 100%; min-height: 44px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235d6b77' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 10px center;
+}
+#kanun-list { overflow-y: auto; flex: 1; }
+.kanun-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid var(--line);
+  cursor: pointer; font-size: 15px; background: none; border-left: none; border-right: none; border-top: none;
+  width: 100%; text-align: left; color: var(--ink);
+}
+.kanun-row:active { background: var(--bg); }
+.kanun-row .kn { font-weight: 600; font-size: 13px; color: var(--muted); margin-right: 8px; min-width: 36px; }
+.kanun-row .kt { flex: 1; }
+.kanun-row .kc { font-size: 13px; color: var(--muted); margin-left: 8px; }
+.kanun-row.selected { color: var(--accent); }
+.kanun-row.selected .kn, .kanun-row.selected .kc { color: var(--accent); opacity: 0.7; }
+
+/* Detail */
 #detail { display: none; }
 #detail .bar {
   position: sticky; top: 0; background: var(--bg); padding: 10px 12px;
@@ -98,7 +150,7 @@ button.ghost { background: transparent; color: var(--accent); }
 
   <div class="filters">
     <label>Kanun
-      <select id="kanun"><option value="">Tüm kanunlar</option></select>
+      <button type="button" class="kanun-btn" id="kanun-btn">Tüm kanunlar</button>
     </label>
     <label>Başlıkta ara
       <input id="q" type="search" placeholder="örn. noter harcı" autocomplete="off" enterkeyhint="search">
@@ -116,6 +168,20 @@ button.ghost { background: transparent; color: var(--accent); }
   <div id="status"></div>
   <div id="list"></div>
   <button id="more" class="ghost" hidden>Daha fazla yükle</button>
+</div>
+
+<!-- Kanun seçim modalı -->
+<div id="kanun-modal" role="dialog" aria-modal="true" aria-label="Kanun seç">
+  <div id="kanun-sheet">
+    <div class="sh-head">
+      <span>Kanun Seç</span>
+      <button id="kanun-close" aria-label="Kapat">×</button>
+    </div>
+    <div id="kanun-search-wrap">
+      <input id="kanun-search" type="search" placeholder="Kanunlarda ara…" autocomplete="off" enterkeyhint="search">
+    </div>
+    <div id="kanun-list"></div>
+  </div>
 </div>
 
 <div id="detail">
@@ -142,6 +208,8 @@ const $ = id => document.getElementById(id);
 
 let state = { page: 0, totalPages: 0, done: true, items: [], busy: false, filters: null };
 let scrollY = 0;
+let allKanunlar = [];
+let selectedKanun = { id: "", label: "Tüm kanunlar" };
 
 async function post(path, params, body) {
   const qs = new URLSearchParams(params).toString();
@@ -163,27 +231,76 @@ function fmtDate(iso) {
   return (iso || "").slice(0, 10).split("-").reverse().join(".");
 }
 
+/* ── Kanun modal ── */
 async function loadKanunlar() {
   try {
     const rc = await post("kanun/filterList",
       { page: 0, size: 1000, sortFieldName: "priority", sortType: "ASC" },
       { kanunType: 99 });
-    const list = Array.isArray(rc) ? rc : (rc.content || []);
-    const sel = $("kanun");
-    list.forEach(k => {
-      const o = document.createElement("option");
-      o.value = k.id;
-      o.textContent = (k.kanunNo ? k.kanunNo + " – " : "") + k.title;
-      sel.appendChild(o);
-    });
+    allKanunlar = Array.isArray(rc) ? rc : (rc.content || []);
+    renderKanunList("");
   } catch (e) {
     setStatus("Kanun listesi alınamadı: " + e.message, true);
   }
 }
 
+function renderKanunList(q) {
+  const kl = $("kanun-list");
+  kl.innerHTML = "";
+  const filtered = q
+    ? allKanunlar.filter(k => (k.kanunNo + " " + k.title).toLowerCase().includes(q.toLowerCase()))
+    : allKanunlar;
+
+  // "Tüm kanunlar" satırı
+  const all = document.createElement("button");
+  all.className = "kanun-row" + (selectedKanun.id === "" ? " selected" : "");
+  all.innerHTML = '<span class="kt">Tüm kanunlar</span><span class="kc">' + (allKanunlar.reduce((s, k) => s + (k.count || 0), 0) || "") + '</span>';
+  all.onclick = () => selectKanun("", "Tüm kanunlar");
+  kl.appendChild(all);
+
+  filtered.forEach(k => {
+    const row = document.createElement("button");
+    row.className = "kanun-row" + (selectedKanun.id == k.id ? " selected" : "");
+    const label = (k.kanunNo ? k.kanunNo + " – " : "") + k.title;
+    row.innerHTML =
+      '<span class="kn">' + (k.kanunNo || "") + '</span>' +
+      '<span class="kt">' + escHtml(k.title) + '</span>' +
+      (k.count ? '<span class="kc">' + k.count + '</span>' : '');
+    row.onclick = () => selectKanun(k.id, label);
+    kl.appendChild(row);
+  });
+}
+
+function escHtml(s) {
+  return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function selectKanun(id, label) {
+  selectedKanun = { id, label };
+  $("kanun-btn").textContent = label;
+  closeKanunModal();
+}
+
+function openKanunModal() {
+  $("kanun-modal").classList.add("open");
+  $("kanun-search").value = "";
+  renderKanunList("");
+  setTimeout(() => $("kanun-search").focus(), 80);
+}
+
+function closeKanunModal() {
+  $("kanun-modal").classList.remove("open");
+}
+
+$("kanun-btn").onclick = openKanunModal;
+$("kanun-close").onclick = closeKanunModal;
+$("kanun-modal").addEventListener("click", e => { if (e.target === $("kanun-modal")) closeKanunModal(); });
+$("kanun-search").addEventListener("input", e => renderKanunList(e.target.value));
+
+/* ── Arama ── */
 function currentFilters() {
   return {
-    kanun: $("kanun").value,
+    kanun: selectedKanun.id,
     q: $("q").value.trim(),
     d1: $("d1").value,
     d2: $("d2").value
@@ -305,7 +422,9 @@ $("go").onclick = search;
 $("more").onclick = () => fetchMore(20);
 $("q").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("q").blur(); search(); } });
 $("clear").onclick = () => {
-  $("kanun").value = ""; $("q").value = ""; $("d1").value = ""; $("d2").value = "";
+  selectedKanun = { id: "", label: "Tüm kanunlar" };
+  $("kanun-btn").textContent = "Tüm kanunlar";
+  $("q").value = ""; $("d1").value = ""; $("d2").value = "";
   search();
 };
 
