@@ -25,7 +25,7 @@
   }
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--ink); height: 100%; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
 body {
   font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-text-size-adjust: 100%;
@@ -42,11 +42,17 @@ body {
 }
 .nav-tab {
   flex: 1; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 3px; cursor: pointer;
+  justify-content: center; gap: 4px; cursor: pointer;
   background: none; border: none; color: var(--muted); font: inherit;
-  font-size: 11px; font-weight: 500; padding: 8px 0; min-height: 0;
+  font-size: 11px; font-weight: 500; padding: 6px 0; min-height: 0;
 }
-.nav-tab svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; }
+.nav-tab .nav-icon {
+  width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+}
+.nav-tab .nav-icon svg {
+  width: 24px; height: 24px; stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
 .nav-tab.active { color: var(--accent); }
 
 /* ── Ekranlar ── */
@@ -54,10 +60,7 @@ body {
 .screen.active { display: block; }
 
 /* ── Header ── */
-header {
-  padding: 16px 16px 8px;
-  font-size: 20px; font-weight: 700; letter-spacing: -0.01em;
-}
+header { padding: 16px 16px 8px; font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
 header small { display: block; font-weight: 400; font-size: 13px; color: var(--muted); margin-top: 2px; }
 
 /* ── Filtreler ── */
@@ -66,7 +69,7 @@ header small { display: block; font-weight: 400; font-size: 13px; color: var(--m
   border: 1px solid var(--line); border-radius: 12px; display: grid; gap: 10px;
 }
 label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
-input, select {
+input {
   font: inherit; color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 8px; padding: 10px; width: 100%; min-height: 44px;
 }
@@ -79,6 +82,15 @@ button {
 }
 button.ghost { background: transparent; color: var(--accent); }
 .actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+
+/* Arama kutuları — ikon ile */
+.input-wrap { position: relative; }
+.input-wrap svg {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; stroke: var(--muted); fill: none;
+  stroke-width: 2; stroke-linecap: round; pointer-events: none;
+}
+.input-wrap input { padding-left: 36px; }
 
 /* Kanun seçici butonu */
 .kanun-btn {
@@ -97,24 +109,19 @@ button.ghost { background: transparent; color: var(--accent); }
 /* ── Sonuç listesi ── */
 #status { padding: 4px 16px; font-size: 13px; color: var(--muted); min-height: 24px; }
 #status.err { color: var(--err); }
-#list { padding: 4px 12px 24px; display: grid; gap: 8px; }
+#list { padding: 4px 12px 16px; display: grid; gap: 8px; }
 .item {
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
   padding: 12px; text-align: left; color: var(--ink); font-weight: 400; display: block; width: 100%;
   min-height: 0;
 }
-.item .t { font-weight: 600; margin-bottom: 6px; }
+.item .t { font-weight: 600; margin-bottom: 6px; line-height: 1.35; }
 .item .m { font-size: 13px; color: var(--muted); }
-#more { margin: 0 12px 28px; width: calc(100% - 24px); }
+#more { margin: 0 12px 20px; width: calc(100% - 24px); }
 
 /* ── Kanunlar ekranı ── */
 #screen-kanunlar header { padding-bottom: 4px; }
 .k-search-wrap { padding: 0 12px 8px; }
-.k-search-wrap input {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235d6b77' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: 10px center;
-  padding-left: 36px;
-}
 #k-list { padding: 0 12px 24px; display: grid; gap: 8px; }
 .k-item {
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
@@ -130,7 +137,7 @@ button.ghost { background: transparent; color: var(--accent); }
 .k-item.all .ki-title { color: var(--accent); }
 .k-item.all .ki-count { border-color: var(--accent); color: var(--accent); }
 
-/* ── Kanun modal (ana sayfadan) ── */
+/* ── Kanun modal ── */
 #kanun-modal {
   display: none; position: fixed; inset: 0; z-index: 100;
   background: rgba(0,0,0,0.45); align-items: flex-end;
@@ -138,44 +145,44 @@ button.ghost { background: transparent; color: var(--accent); }
 #kanun-modal.open { display: flex; }
 #kanun-sheet {
   background: var(--panel); border-radius: 16px 16px 0 0;
-  width: 100%; max-height: 80vh; display: flex; flex-direction: column;
+  width: 100%; max-height: 82vh; display: flex; flex-direction: column;
   padding-bottom: env(safe-area-inset-bottom);
 }
-#kanun-sheet .sh-head {
-  padding: 16px 16px 8px; display: flex; align-items: center; justify-content: space-between;
+.sh-head {
+  padding: 16px 16px 10px; display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid var(--line);
 }
-#kanun-sheet .sh-head span { font-weight: 700; font-size: 17px; }
-#kanun-sheet .sh-head button { background: none; border: none; font-size: 22px; color: var(--muted); min-height: 0; padding: 0 4px; }
-#modal-search-wrap { padding: 10px 12px; }
-#modal-kanun-search {
-  font: inherit; color: var(--ink); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 8px; padding: 10px 10px 10px 36px;
-  width: 100%; min-height: 44px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235d6b77' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: 10px center;
-}
+.sh-head span { font-weight: 700; font-size: 17px; }
+.sh-head button { background: none; border: none; font-size: 24px; color: var(--muted); min-height: 0; padding: 0 4px; line-height: 1; }
+.modal-search-wrap { padding: 10px 12px; }
 #modal-kanun-list { overflow-y: auto; flex: 1; }
 .kanun-row {
-  display: flex; align-items: center;
+  display: flex; align-items: center; gap: 10px;
   padding: 14px 16px; border-bottom: 1px solid var(--line);
   cursor: pointer; background: none; border-left: none; border-right: none; border-top: none;
   width: 100%; text-align: left; color: var(--ink); font-size: 15px;
 }
-.kanun-row .kn { font-weight: 600; font-size: 12px; color: var(--muted); min-width: 36px; }
-.kanun-row .kt { flex: 1; }
-.kanun-row .kc { font-size: 13px; color: var(--muted); margin-left: 8px;
-  background: var(--bg); border: 1px solid var(--line); border-radius: 20px; padding: 2px 8px; }
-.kanun-row.selected { color: var(--accent); }
-.kanun-row.selected .kn, .kanun-row.selected .kc { color: var(--accent); opacity: 0.8; }
+.kanun-row .kn { font-size: 12px; color: var(--muted); min-width: 34px; flex-shrink: 0; }
+.kanun-row .kt { flex: 1; font-weight: 500; }
+.kanun-row .kc {
+  font-size: 12px; color: var(--muted); flex-shrink: 0;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 20px; padding: 2px 8px;
+}
+.kanun-row.selected .kt { color: var(--accent); font-weight: 700; }
+.kanun-row.selected .kn { color: var(--accent); }
 
 /* ── Detay ── */
-#detail { display: none; position: fixed; inset: 0; background: var(--bg); overflow-y: auto; z-index: 200; }
+#detail {
+  display: none; position: fixed; inset: 0; background: var(--bg);
+  overflow-y: auto; z-index: 200;
+  padding-top: env(safe-area-inset-top);
+}
 #detail .bar {
   position: sticky; top: 0; background: var(--bg); padding: 10px 12px;
-  display: grid; grid-template-columns: auto 1fr; gap: 10px; border-bottom: 1px solid var(--line);
-  padding-top: calc(10px + env(safe-area-inset-top));
+  display: flex; gap: 8px; border-bottom: 1px solid var(--line);
 }
+#detail .bar button:first-child { flex-shrink: 0; }
+#detail .bar button:last-child { margin-left: auto; flex-shrink: 0; }
 #detail .head { padding: 14px 16px 4px; }
 #detail h2 { margin: 0 0 6px; font-size: 18px; line-height: 1.3; }
 #detail .meta { font-size: 13px; color: var(--muted); }
@@ -185,6 +192,8 @@ button.ghost { background: transparent; color: var(--accent); }
   font: 16px/1.6 Georgia, "Times New Roman", serif; overflow-x: auto;
 }
 #body p { margin: 0 0 0.8em; }
+#body table { max-width: 100%; border-collapse: collapse; }
+#body td, #body th { vertical-align: top; padding: 2px 4px; }
 </style>
 </head>
 <body>
@@ -198,7 +207,16 @@ button.ghost { background: transparent; color: var(--accent); }
       <button type="button" class="kanun-btn" id="kanun-btn">Tüm kanunlar</button>
     </label>
     <label>Başlıkta ara
-      <input id="q" type="search" placeholder="örn. noter harcı" autocomplete="off" enterkeyhint="search">
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="q" type="search" placeholder="örn. noter harcı" autocomplete="off" enterkeyhint="search">
+      </div>
+    </label>
+    <label>Özelge / Sayı numarası
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <input id="ozelge-no" type="search" placeholder="örn. E-79690095-140" autocomplete="off" enterkeyhint="search">
+      </div>
     </label>
     <div class="row">
       <label>Başlangıç tarihi <input id="d1" type="date"></label>
@@ -219,7 +237,10 @@ button.ghost { background: transparent; color: var(--accent); }
 <div id="screen-kanunlar" class="screen">
   <header>Kanunlar<small>Kanuna göre özelge listesi</small></header>
   <div class="k-search-wrap">
-    <input id="k-search" type="search" placeholder="Kanunlarda ara…" autocomplete="off">
+    <div class="input-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="k-search" type="search" placeholder="Kanunlarda ara…" autocomplete="off">
+    </div>
   </div>
   <div id="k-list"></div>
 </div>
@@ -227,11 +248,15 @@ button.ghost { background: transparent; color: var(--accent); }
 <!-- ── Alt nav ── -->
 <nav id="nav">
   <button class="nav-tab active" data-tab="screen-ana">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </span>
     Ara
   </button>
   <button class="nav-tab" data-tab="screen-kanunlar">
-    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </span>
     Kanunlar
   </button>
 </nav>
@@ -243,8 +268,11 @@ button.ghost { background: transparent; color: var(--accent); }
       <span>Kanun Seç</span>
       <button id="kanun-close" aria-label="Kapat">×</button>
     </div>
-    <div id="modal-search-wrap">
-      <input id="modal-kanun-search" type="search" placeholder="Kanunlarda ara…" autocomplete="off">
+    <div class="modal-search-wrap">
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="modal-kanun-search" type="search" placeholder="Kanunlarda ara…" autocomplete="off">
+      </div>
     </div>
     <div id="modal-kanun-list"></div>
   </div>
@@ -253,8 +281,8 @@ button.ghost { background: transparent; color: var(--accent); }
 <!-- ── Detay ── -->
 <div id="detail">
   <div class="bar">
-    <button id="back" class="ghost">Geri</button>
-    <button id="copy" class="ghost">Metni kopyala</button>
+    <button id="back" class="ghost">← Geri</button>
+    <button id="copy" class="ghost">Kopyala</button>
   </div>
   <div class="head">
     <h2 id="dt"></h2>
@@ -270,7 +298,7 @@ const PAGE_SIZE = 50;
 const $ = id => document.getElementById(id);
 
 let allKanunlar = [];
-let selectedKanun = { id: "", label: "Tüm kanunlar" };
+let selectedKanun = { id:"", label:"Tüm kanunlar" };
 let searchState = { page:0, totalPages:0, done:true, items:[], busy:false, filters:null, total:0 };
 let scrollY = 0;
 
@@ -317,7 +345,6 @@ function renderKScreen(q) {
   const filtered = filterKanunlar(q);
   const totalCount = allKanunlar.reduce((s,k)=>s+(k.count||0),0);
 
-  // Tüm kanunlar satırı
   const all = document.createElement("button");
   all.className = "k-item all";
   all.innerHTML = `<div><div class="ki-title">Tüm kanunlar</div></div><span class="ki-count">${totalCount||"…"}</span>`;
@@ -325,9 +352,9 @@ function renderKScreen(q) {
   list.appendChild(all);
 
   filtered.forEach(k => {
+    const label = (k.kanunNo ? k.kanunNo+" – " : "") + k.title;
     const el = document.createElement("button");
     el.className = "k-item";
-    const label = (k.kanunNo ? k.kanunNo+" – " : "") + k.title;
     el.innerHTML =
       `<div>${k.kanunNo?`<div class="ki-no">${esc(k.kanunNo)}</div>`:""}
        <div class="ki-title">${esc(k.title)}</div></div>` +
@@ -337,7 +364,7 @@ function renderKScreen(q) {
   });
 }
 
-/* Modal (ana sayfadan açılır) */
+/* Modal */
 function renderModal(q) {
   const list = $("modal-kanun-list");
   list.innerHTML = "";
@@ -373,7 +400,6 @@ function applyKanun(id, label) {
   search();
 }
 
-/* Modal aç/kapat */
 $("kanun-btn").onclick = () => { renderModal($("modal-kanun-search").value); openModal(); };
 $("kanun-close").onclick = closeModal;
 $("kanun-modal").addEventListener("click", e => { if (e.target===$("kanun-modal")) closeModal(); });
@@ -381,7 +407,6 @@ $("modal-kanun-search").addEventListener("input", e => renderModal(e.target.valu
 function openModal() { $("kanun-modal").classList.add("open"); setTimeout(()=>$("modal-kanun-search").focus(),80); }
 function closeModal() { $("kanun-modal").classList.remove("open"); }
 
-/* Kanunlar ekranı arama */
 $("k-search").addEventListener("input", e => renderKScreen(e.target.value));
 
 /* ── Alt nav ── */
@@ -397,12 +422,20 @@ document.querySelectorAll(".nav-tab").forEach(btn=>{
 
 /* ── Arama ── */
 function currentFilters() {
-  return { kanun:selectedKanun.id, q:$("q").value.trim(), d1:$("d1").value, d2:$("d2").value };
+  return {
+    kanun: selectedKanun.id,
+    q: $("q").value.trim(),
+    ozelgeNo: $("ozelge-no").value.trim(),
+    d1: $("d1").value,
+    d2: $("d2").value
+  };
 }
+
 function buildBody(f) {
   const b = { status:2, deleted:false, ktype:99 };
   if (f.kanun) b.kanunIds = [Number(f.kanun)];
   if (f.q) b.title = f.q;
+  if (f.ozelgeNo) b.ozelgeNo = f.ozelgeNo;
   return b;
 }
 
@@ -479,22 +512,24 @@ function openDetail(i) {
 }
 
 $("back").onclick=()=>history.back();
-window.addEventListener("popstate",()=>{ if($("detail").style.display==="block") { $("detail").style.display="none"; } });
+window.addEventListener("popstate",()=>{ if($("detail").style.display==="block") $("detail").style.display="none"; });
 
 $("copy").onclick=async()=>{
   const text=$("dt").textContent+"\n"+$("dm").textContent+"\n\n"+$("body").innerText;
-  try { await navigator.clipboard.writeText(text); $("copy").textContent="Kopyalandı"; }
+  try { await navigator.clipboard.writeText(text); $("copy").textContent="Kopyalandı ✓"; }
   catch(e) { $("copy").textContent="Kopyalanamadı"; }
-  setTimeout(()=>{ $("copy").textContent="Metni kopyala"; },1800);
+  setTimeout(()=>{ $("copy").textContent="Kopyala"; },1800);
 };
 
 $("go").onclick=search;
 $("more").onclick=()=>fetchMore(20);
-$("q").addEventListener("keydown",e=>{ if(e.key==="Enter"){e.preventDefault();$("q").blur();search();} });
+["q","ozelge-no"].forEach(id=>{
+  $(id).addEventListener("keydown",e=>{ if(e.key==="Enter"){e.preventDefault();$(id).blur();search();} });
+});
 $("clear").onclick=()=>{
   selectedKanun={id:"",label:"Tüm kanunlar"};
   $("kanun-btn").textContent="Tüm kanunlar"; $("kanun-btn").className="kanun-btn";
-  $("q").value=""; $("d1").value=""; $("d2").value="";
+  $("q").value=""; $("ozelge-no").value=""; $("d1").value=""; $("d2").value="";
   search();
 };
 
