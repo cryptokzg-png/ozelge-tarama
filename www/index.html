@@ -286,20 +286,18 @@ label.lbl{display:grid;gap:4px;font-size:13px;color:var(--muted);}
   </div>
 
   <!-- Popüler Konular -->
-  <div class="section">
-    <div class="section-title">Popüler Konular</div>
-    <div class="popular-chips">
-      <button class="pop-chip" data-q="KDV">KDV</button>
-      <button class="pop-chip" data-q="tapu harcı">Tapu Harcı</button>
-      <button class="pop-chip" data-q="e-ticaret">E-ticaret</button>
-      <button class="pop-chip" data-q="kira geliri">Kira Geliri</button>
-      <button class="pop-chip" data-q="istisna">İstisna</button>
-      <button class="pop-chip" data-q="e-fatura">E-fatura</button>
-      <button class="pop-chip" data-q="şirket devri">Şirket Devri</button>
-      <button class="pop-chip" data-q="araç satışı">Araç Satışı</button>
-      <button class="pop-chip" data-q="stopaj">Stopaj</button>
-      <button class="pop-chip" data-q="arsa satışı">Arsa Satışı</button>
+  <div class="section" style="padding-bottom:24px;">
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span>Popüler Konular</span>
+      <button id="pop-ekle-btn" style="font:inherit;font-size:13px;font-weight:600;color:var(--accent);background:none;border:1px solid var(--accent);border-radius:20px;padding:3px 12px;cursor:pointer;min-height:0;">+ Ekle</button>
     </div>
+    <div id="pop-ekle-form" style="display:none;margin-bottom:10px;display:none;">
+      <div style="display:flex;gap:8px;">
+        <input id="pop-ekle-input" type="text" placeholder="Yeni konu…" style="flex:1;min-height:40px;" autocomplete="off">
+        <button id="pop-ekle-kaydet" style="font:inherit;font-weight:600;background:var(--accent);color:var(--accent-ink);border:none;border-radius:8px;padding:0 16px;cursor:pointer;min-height:40px;white-space:nowrap;">Ekle</button>
+      </div>
+    </div>
+    <div id="popular-chips" class="popular-chips"></div>
   </div>
 </div>
 
@@ -351,6 +349,12 @@ label.lbl{display:grid;gap:4px;font-size:13px;color:var(--muted);}
   <div id="results-header">
     <button class="rh-back" id="results-back-btn">← Aramaya Dön</button>
     <div class="rh-info" id="results-info"></div>
+  </div>
+  <div class="section" style="margin-bottom:4px;">
+    <div class="input-ico">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="results-filter" type="search" placeholder="Sonuçlar içinde ara…" autocomplete="off">
+    </div>
   </div>
   <div id="status"></div>
   <div id="result-list"></div>
@@ -518,10 +522,11 @@ async function loadKanunlar(){
   }catch(e){setStatus("Kanun listesi alınamadı: "+e.message,true);}
 }
 
+function trLower(s){return(s||"").toLocaleLowerCase("tr-TR");}
 function filterK(q){
   if(!q) return allKanunlar;
-  const lq=q.toLowerCase();
-  return allKanunlar.filter(k=>((k.kanunNo||"")+" "+(k.title||"")).toLowerCase().includes(lq));
+  const lq=trLower(q);
+  return allKanunlar.filter(k=>trLower((k.kanunNo||"")+" "+(k.title||"")).includes(lq));
 }
 
 function renderKScreen(q){
@@ -589,7 +594,10 @@ $("k-search").addEventListener("input",e=>renderKScreen(e.target.value));
 /* ════════════════════════════
    SEKME NAVİGASYONU
 ════════════════════════════ */
-function showTab(id){
+let navStack=["screen-ana"];
+history.replaceState({screen:"screen-ana"},"");
+
+function showTab(id, pushHist=true){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".nav-tab").forEach(t=>t.classList.remove("active"));
   $(id).classList.add("active");
@@ -597,6 +605,10 @@ function showTab(id){
   if(navBtn) navBtn.classList.add("active");
   if(id==="screen-favoriler") renderFavs();
   if(id==="screen-gecmis") renderGecmis();
+  if(pushHist){
+    navStack.push(id);
+    history.pushState({screen:id},"");
+  }
 }
 document.querySelectorAll(".nav-tab").forEach(btn=>{
   btn.addEventListener("click",()=>showTab(btn.dataset.tab));
@@ -681,6 +693,7 @@ function runSearch(fromAna){
   searchState={page:0,totalPages:0,done:false,items:[],busy:false,
     filters:{q,kanun,d1,d2,ozelgeNo},sort};
   $("result-list").innerHTML="";
+  $("results-filter").value=""; resultsFilterQ="";
   $("more-btn").hidden=true;
 
   const info=[];
@@ -692,10 +705,22 @@ function runSearch(fromAna){
   fetchPage();
 }
 
-function renderResults(){
+let resultsFilterQ="";
+$("results-filter").addEventListener("input",e=>{
+  resultsFilterQ=trLower(e.target.value.trim());
+  renderResults(true);
+});
+
+function renderResults(refilter=false){
   const list=$("result-list");
-  searchState.items.forEach((it,i)=>{
-    if(list.children[i]) return;  // zaten render edilmiş
+  if(refilter) list.innerHTML="";
+  const visible=resultsFilterQ
+    ? searchState.items.filter(it=>trLower(it.title||"").includes(resultsFilterQ)||trLower(it.ozelgeNo||"").includes(resultsFilterQ))
+    : searchState.items;
+  // Temiz render: mevcut çocuk sayısından fazlasını ekle
+  const existingCount=list.children.length;
+  visible.forEach((it,i)=>{
+    if(!refilter&&i<existingCount) return;
     const el=document.createElement("button");
     el.className="r-item card";
     const starred=isFav(it.id);
@@ -703,17 +728,16 @@ function renderResults(){
       <div class="t">${esc(it.title||"(başlıksız)")}</div>
       <div class="m">${fmtDate(it.ozelgeTarih)} · ${esc(it.kanunTitle||"")} · ${esc(it.ozelgeNo||"")}</div>
     </div>
-    <button class="star-btn${starred?" starred":""}" data-idx="${i}" title="Favorilere ekle">${starred?"★":"☆"}</button>`;
+    <button class="star-btn${starred?" starred":""}" title="Favorilere ekle">${starred?"★":"☆"}</button>`;
 
     el.querySelector(".star-btn").addEventListener("click",e=>{
       e.stopPropagation();
-      const idx=Number(e.currentTarget.dataset.idx);
-      toggleFav(searchState.items[idx]);
-      const on=isFav(searchState.items[idx].id);
+      toggleFav(it);
+      const on=isFav(it.id);
       e.currentTarget.textContent=on?"★":"☆";
       e.currentTarget.className="star-btn"+(on?" starred":"");
     });
-    el.addEventListener("click",()=>openDetail(searchState.items[i]));
+    el.addEventListener("click",()=>openDetail(it));
     list.appendChild(el);
   });
   $("more-btn").hidden=searchState.done||!searchState.items.length;
@@ -747,15 +771,62 @@ $("f-temizle-btn").onclick=()=>{
 });
 
 /* ── Popüler konular ── */
-document.querySelectorAll(".pop-chip").forEach(c=>{
-  c.addEventListener("click",()=>{
-    $("ana-q").value=c.dataset.q;
-    // zaman filtresini sıfırla
-    $("quick-filters").querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));
-    $("quick-filters").querySelector('[data-days=""]').classList.add("active");
-    runSearch(true);
+const DEFAULT_TOPICS=["KDV","Tapu Harcı","E-ticaret","Kira Geliri","İstisna","E-fatura","Şirket Devri","Araç Satışı","Stopaj","Arsa Satışı"];
+function getCustomTopics(){try{return JSON.parse(localStorage.getItem("ozt_topics")||"[]");}catch{return[];}}
+function setCustomTopics(a){try{localStorage.setItem("ozt_topics",JSON.stringify(a));}catch{}}
+
+function renderPopTopics(){
+  const wrap=$("popular-chips"); wrap.innerHTML="";
+  const custom=getCustomTopics();
+  const all=[...DEFAULT_TOPICS,...custom];
+  all.forEach((q,i)=>{
+    const isCustom=i>=DEFAULT_TOPICS.length;
+    const wrap2=document.createElement("span");
+    wrap2.style.display="inline-flex";wrap2.style.alignItems="center";wrap2.style.gap="2px";
+    const btn=document.createElement("button");
+    btn.className="pop-chip"; btn.textContent=q;
+    btn.addEventListener("click",()=>{
+      $("ana-q").value=q;
+      $("quick-filters").querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));
+      $("quick-filters").querySelector('[data-days=""]').classList.add("active");
+      runSearch(true);
+    });
+    wrap2.appendChild(btn);
+    if(isCustom){
+      const del=document.createElement("button");
+      del.textContent="✕";del.title="Sil";
+      del.style.cssText="font:inherit;font-size:11px;background:none;border:none;color:var(--muted);cursor:pointer;padding:0 0 0 2px;min-height:0;line-height:1;";
+      del.addEventListener("click",e=>{
+        e.stopPropagation();
+        const ct=getCustomTopics();ct.splice(i-DEFAULT_TOPICS.length,1);
+        setCustomTopics(ct);renderPopTopics();
+      });
+      wrap2.appendChild(del);
+    }
+    wrap.appendChild(wrap2);
   });
+}
+renderPopTopics();
+
+$("pop-ekle-btn").addEventListener("click",()=>{
+  const f=$("pop-ekle-form");
+  f.style.display=f.style.display==="none"?"flex":"none";
+  if(f.style.display==="flex") setTimeout(()=>$("pop-ekle-input").focus(),80);
 });
+
+function savePopTopic(){
+  const v=$("pop-ekle-input").value.trim();
+  if(!v) return;
+  const ct=getCustomTopics();
+  if(![...DEFAULT_TOPICS,...ct].map(x=>x.toLowerCase()).includes(v.toLowerCase())){
+    ct.push(v); setCustomTopics(ct);
+  }
+  $("pop-ekle-input").value="";
+  $("pop-ekle-form").style.display="none";
+  renderPopTopics();
+}
+$("pop-ekle-kaydet").addEventListener("click",savePopTopic);
+$("pop-ekle-input").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();savePopTopic();}});
 
 /* ── Sonuçlar geri ── */
 $("results-back-btn").addEventListener("click",()=>{
@@ -866,7 +937,16 @@ function openDetail(it){
 }
 
 $("d-back").onclick=()=>history.back();
-window.addEventListener("popstate",()=>{if($("detail").style.display==="block")$("detail").style.display="none";});
+window.addEventListener("popstate",()=>{
+  if($("detail").style.display==="block"){
+    $("detail").style.display="none";
+    return;
+  }
+  if(navStack.length>1){
+    navStack.pop();
+    showTab(navStack[navStack.length-1], false);
+  }
+});
 
 $("d-star").onclick=()=>{
   if(!currentItem) return;
