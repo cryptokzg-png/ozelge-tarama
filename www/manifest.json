@@ -1,7 +1,8 @@
 {
   "name": "Özelge Tarama",
   "short_name": "Özelge",
-  "start_url": "/",
+  "start_url": "/ozelge-tarama/",
+  "scope": "/ozelge-tarama/",
   "display": "standalone",
   "background_color": "#edf0f4",
   "theme_color": "#0f5fa8",
